@@ -14,7 +14,12 @@ Route::get('/', [AccueilController::class, 'index'])->name('accueil');
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 Route::get('/services/{slug}', [ServiceController::class, 'show'])->name('services.show');
 
-// Routes d'authentification prestataire
+// Route de login pour résoudre la redirection par défaut de Laravel
+Route::get('/login', function () {
+    return redirect()->route('prestataire.connexion');
+})->name('login');
+
+// Routes d'authentification prestataire (accessibles aux invités)
 Route::middleware('guest')->group(function () {
     Route::get('/inscription', [PrestataireAuthController::class, 'inscriptionForm'])->name('prestataire.inscription');
     Route::post('/inscription', [PrestataireAuthController::class, 'inscription']);
@@ -22,8 +27,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/connexion', [PrestataireAuthController::class, 'connexion']);
 });
 
-// Routes prestataire authentifié
-Route::middleware('auth')->prefix('prestataire')->name('prestataire.')->group(function () {
+// Routes prestataire authentifié - Remplacez 'auth' par 'auth.prestataire'
+Route::middleware('auth.prestataire')->prefix('prestataire')->name('prestataire.')->group(function () {
     Route::get('/attente', [PrestatairePanneauController::class, 'attente'])->name('attente');
     Route::post('/deconnexion', [PrestataireAuthController::class, 'deconnexion'])->name('deconnexion');
     
@@ -46,9 +51,6 @@ Route::middleware('auth')->prefix('prestataire')->name('prestataire.')->group(fu
         // Rapports
         Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
         Route::get('/rapports/{rapport}', [RapportController::class, 'show'])->name('rapports.show');
-        Route::get('/login', function () {
-            return redirect()->route('prestataire.connexion');
-        })->name('login');
     });
 });
 

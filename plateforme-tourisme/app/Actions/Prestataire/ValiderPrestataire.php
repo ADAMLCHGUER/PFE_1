@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Actions\Prestataire;
 
 use App\Models\Prestataire;
@@ -24,16 +23,25 @@ class ValiderPrestataire
             $prestataire->save();
             
             // Notification au prestataire que son compte est validé
-            // Utiliser l'email du prestataire directement
-            Notification::route('mail', $prestataire->email)
-                ->notify(new ComptePrestatairValide($prestataire));
+            // Utiliser l'utilisateur associé au prestataire
+            if ($prestataire->user) {
+                $prestataire->user->notify(new ComptePrestatairValide($prestataire));
+            } else {
+                // Fallback si pas d'utilisateur (ne devrait pas arriver)
+                Notification::route('mail', $prestataire->email)
+                    ->notify(new ComptePrestatairValide($prestataire));
+            }
         } else {
             $prestataire->save();
             
             // Notification au prestataire que son compte est refusé
-            // Utiliser l'email du prestataire directement
-            Notification::route('mail', $prestataire->email)
-                ->notify(new ComptePrestatairNonValide($prestataire));
+            if ($prestataire->user) {
+                $prestataire->user->notify(new ComptePrestatairNonValide($prestataire));
+            } else {
+                // Fallback si pas d'utilisateur (ne devrait pas arriver)
+                Notification::route('mail', $prestataire->email)
+                    ->notify(new ComptePrestatairNonValide($prestataire));
+            }
         }
         
         return true;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticatePrestataire;
 use App\Http\Middleware\VerifierPrestataireValide;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'prestataire.valide' => VerifierPrestataireValide::class,
+            'auth.prestataire' => AuthenticatePrestataire::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

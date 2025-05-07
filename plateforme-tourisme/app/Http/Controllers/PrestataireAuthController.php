@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prestataire;
-use App\Models\User;
-use App\Notifications\ComptePrestatairEnRevision;
 use App\Notifications\NouveauPrestataireInscrit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Session;
 
 class PrestataireAuthController extends Controller
 {
@@ -22,26 +21,26 @@ class PrestataireAuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:prestataires,email',
             'password' => 'required|min:8|confirmed',
             'nom_entreprise' => 'required|string|max:255',
             'telephone' => 'required|string|max:20',
             'adresse' => 'required|string',
         ]);
         
-        // Créer le prestataire directement (sans l'action)
+        // Créer directement le prestataire
         $prestataire = Prestataire::create([
             'nom_entreprise' => $validated['nom_entreprise'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
             'telephone' => $validated['telephone'],
             'adresse' => $validated['adresse'],
-            'email' => $validated['email'], // Ajout de l'email ici
             'statut' => 'en_revision',
         ]);
         
         // Envoyer notification aux administrateurs
-        // Vérifiez cette ligne
         Notification::route('mail', config('mail.admin_address'))
-        ->notify(new NouveauPrestataireInscrit($prestataire));
+            ->notify(new NouveauPrestataireInscrit($prestataire));
         
         // Rediriger vers la page d'attente
         return redirect()->route('prestataire.attente');
@@ -59,12 +58,20 @@ class PrestataireAuthController extends Controller
             'password' => 'required',
         ]);
         
-        if (Auth::attempt($credentials)) {
+        // Rechercher le prestataire par email
+        $prestataire = Prestataire::where('email', $credentials['email'])->first();
+        
+        // Vérifier le mot de passe
+        if ($prestataire && Hash::check($credentials['password'], $prestataire->password)) {
+            // Stocker l'ID du prestataire en session
+            Session::put('prestataire_id', $prestataire->id);
+            Session::put('prestataire_email', $prestataire->email);
+            Session::put('prestataire_nom', $prestataire->nom_entreprise);
+            
             $request->session()->regenerate();
             
-            // Vérifier si l'utilisateur est associé à un prestataire
-            $prestataire = Prestataire::where('email', $credentials['email'])->first();
-            if ($prestataire && $prestataire->statut === 'valide') {
+            // Rediriger en fonction du statut
+            if ($prestataire->estValide()) {
                 return redirect()->route('prestataire.tableau');
             }
             
@@ -78,7 +85,8 @@ class PrestataireAuthController extends Controller
     
     public function deconnexion(Request $request)
     {
-        Auth::logout();
+        // Supprimer les données du prestataire de la session
+        Session::forget(['prestataire_id', 'prestataire_email', 'prestataire_nom']);
         
         $request->session()->invalidate();
         $request->session()->regenerateToken();

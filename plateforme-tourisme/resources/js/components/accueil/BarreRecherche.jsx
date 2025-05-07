@@ -15,8 +15,8 @@ const BarreRecherche = () => {
         const fetchData = async () => {
             try {
                 const [categoriesRes, villesRes] = await Promise.all([
-                    axios.get('/api/categories'),
-                    axios.get('/api/villes')
+                    axios.get('/Api/CategoriesConntroller'),
+                    axios.get('/Api/villesController')
                 ]);
                 setCategories(categoriesRes.data);
                 setVilles(villesRes.data);

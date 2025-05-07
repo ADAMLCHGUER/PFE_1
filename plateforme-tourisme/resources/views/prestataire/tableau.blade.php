@@ -4,7 +4,7 @@
     <div class="container py-5">
         <div class="row mb-4">
             <div class="col-md-8">
-                <h1 class="mb-3">Bienvenue, {{ Auth::user()->name }}</h1>
+                <h1 class="mb-3">Bienvenue, {{ session('prestataire_nom') }}</h1>
                 <p class="lead">Gérez votre service et consultez vos statistiques.</p>
             </div>
             <div class="col-md-4 text-end">

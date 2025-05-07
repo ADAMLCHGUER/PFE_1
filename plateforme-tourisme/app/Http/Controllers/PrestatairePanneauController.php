@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Service;
 use App\Models\Visite;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class PrestatairePanneauController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la requête (ajouté par le middleware)
+        $prestataire = $request->attributes->get('prestataire');
         $service = $prestataire->service;
         
         // Si le prestataire n'a pas encore de service, rediriger vers la création
@@ -36,14 +37,20 @@ class PrestatairePanneauController extends Controller
         return view('prestataire.tableau', compact('prestataire', 'service', 'totalVisites', 'visitesRecentes', 'visitesParJour'));
     }
     
-    public function attente()
+    public function attente(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
-        
-        if ($prestataire && $prestataire->estValide()) {
-            return redirect()->route('prestataire.tableau');
+        // Si la session a un prestataire_id, on récupère le prestataire
+        if (Session::has('prestataire_id')) {
+            $prestataire = \App\Models\Prestataire::find(Session::get('prestataire_id'));
+            
+            if ($prestataire && $prestataire->estValide()) {
+                return redirect()->route('prestataire.tableau');
+            }
+            
+            return view('prestataire.attente', compact('prestataire'));
         }
         
-        return view('prestataire.attente', compact('prestataire'));
+        // Si pas de prestataire en session, rediriger vers la connexion
+        return redirect()->route('prestataire.connexion');
     }
 }

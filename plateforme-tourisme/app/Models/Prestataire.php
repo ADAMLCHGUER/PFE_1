@@ -16,12 +16,18 @@ class Prestataire extends Model
         'telephone',
         'adresse',
         'email',
+        'password', // Champ password pour l'authentification
         'statut',
         'date_validation',
     ];
 
+    protected $hidden = [
+        'password', // Masquer le mot de passe dans les réponses JSON
+    ];
+
     protected $casts = [
         'date_validation' => 'datetime',
+        'password' => 'hashed', // Assurer que le mot de passe est haché
     ];
 
     public function service()

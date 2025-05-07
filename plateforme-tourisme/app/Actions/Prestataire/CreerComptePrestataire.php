@@ -24,6 +24,7 @@ class CreerComptePrestataire
             'nom_entreprise' => $data['nom_entreprise'],
             'telephone' => $data['telephone'],
             'adresse' => $data['adresse'],
+            'email' => $data['email'], // Stocker l'email ici aussi pour faciliter les notifications
             'statut' => 'en_revision',
         ]);
         

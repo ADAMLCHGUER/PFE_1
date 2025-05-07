@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('telephone');
             $table->text('adresse');
             $table->string('email')->unique();
+            $table->string('password'); // Ajout du champ pour le mot de passe
             $table->enum('statut', ['en_revision', 'valide', 'non_valide'])->default('en_revision');
             $table->timestamp('date_validation')->nullable();
             $table->timestamps();
