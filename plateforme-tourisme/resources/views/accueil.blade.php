@@ -17,12 +17,7 @@
         </div>
     </div>
     
-    <!-- Barre de recherche -->
-    <div class="container mb-5">
-        <div class="bg-light p-4 rounded">
-            <div id="barreRechercheComponent"></div>
-        </div>
-    </div>
+    
     
     <!-- Catégories populaires -->
     <div class="container mb-5">
@@ -64,12 +59,27 @@
         </div>
     </div>
     
+
     <!-- Services populaires -->
     <div class="container mb-5">
         <h2 class="mb-4">Services populaires</h2>
-        <div id="servicesPopulairesComponent" data-services="{{ json_encode($servicesPopulaires) }}"></div>
+        <div class="row">
+            @foreach($servicesPopulaires as $service)
+                <div class="col-md-4 mb-4">
+                    <a href="{{ route('services.show', $service->id) }}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm">
+                            <img src="{{ asset('storage/' . $service->image) }}" class="card-img-top" alt="{{ $service->nom }}" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $service->nom }}</h5>
+                                <p class="card-text text-muted">{{ Str::limit($service->description, 100) }}</p>
+                                <p class="card-text text-primary font-weight-bold">{{ $service->prix }} MAD</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
     </div>
-    
     <!-- Call to action pour les prestataires -->
     <div class="container mb-5">
         <div class="bg-secondary text-white p-5 rounded">

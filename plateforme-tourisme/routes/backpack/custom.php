@@ -23,10 +23,12 @@ Route::group([
     Route::crud('rapport', 'RapportCrudController');
      // Validation et refus de prestataires
      Route::get('prestataire/{id}/valider', 'PrestataireCrudController@valider');
-     Route::get('prestataire/{id}/refuser', [PrestataireCrudController::class, 'refuser']);
+     Route::get('prestataire/{id}/refuser', 'PrestataireCrudController@refuser');
      
      // Téléchargement de rapports
      Route::get('rapport/{id}/telecharger', [RapportCrudController::class, 'telecharger']);
+     //Route::get('rapport/{id}/telecharger', 'RapportCrudController@telecharger'); faild version
+
      // Tableau de bord personnalisé
 Route::get('dashboard', 'DashboardController@dashboard')->name('backpack.dashboard');
 }); // this should be the absolute last line of this file

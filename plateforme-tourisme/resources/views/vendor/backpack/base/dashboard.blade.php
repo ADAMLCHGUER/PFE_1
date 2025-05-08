@@ -143,10 +143,25 @@
 @push('after_scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Préparer les données pour le graphique
+    // Préparer les données pour le graphique (réelles + fausses)
     const visitesData = @json($visitesParJour);
-    const dates = visitesData.map(item => item.date);
-    const counts = visitesData.map(item => item.count);
+    
+    // Ajouter des fausses données pour démo
+    const fakeData = [
+        { date: '2023-05-01', count: 12 },
+        { date: '2023-05-02', count: 18 },
+        { date: '2023-05-03', count: 15 },
+        { date: '2023-05-04', count: 22 },
+        { date: '2023-05-05', count: 30 },
+        { date: '2023-05-06', count: 28 },
+        { date: '2023-05-07', count: 35 }
+    ];
+    
+    // Fusionner les vraies et fausses données
+    const allData = [...visitesData, ...fakeData];
+    
+    const dates = allData.map(item => item.date);
+    const counts = allData.map(item => item.count);
     
     // Créer le graphique
     const ctx = document.getElementById('visites-chart').getContext('2d');

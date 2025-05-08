@@ -11,6 +11,8 @@ import PrestataireStats from './components/prestataire/GraphiqueStatistiques';
 import ServiceForm from './components/prestataire/FormulaireService';
 import RapportList from './components/rapports/ListeRapports';
 
+window.DetailService = ServiceDetail;
+
 // Initialiser les composants React sur les éléments HTML correspondants
 const initializeComponent = (elementId, Component) => {
     const element = document.getElementById(elementId);
