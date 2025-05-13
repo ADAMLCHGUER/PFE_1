@@ -71,7 +71,7 @@
                                             <span class="text-muted">{{ $service->ville->nom }}</span>
                                         </div>
                                         <hr>
-                                        <a href="{{ route('services.show', $service) }}" 
+                                        <a href="{{ route('services.show', $service->slug) }}"
                                            class="btn btn-outline-primary">
                                             Voir les détails
                                         </a>

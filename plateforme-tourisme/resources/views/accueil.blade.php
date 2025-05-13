@@ -66,7 +66,8 @@
         <div class="row">
             @foreach($servicesPopulaires as $service)
                 <div class="col-md-4 mb-4">
-                    <a href="{{ route('services.show', $service->id) }}" class="text-decoration-none">
+                    <a href="{{ route('services.show', $service->slug) }}" class="text-decoration-none">
+
                         <div class="card border-0 shadow-sm">
                             <img src="{{ asset('storage/' . $service->image) }}" class="card-img-top" alt="{{ $service->nom }}" style="height: 200px; object-fit: cover;">
                             <div class="card-body">
