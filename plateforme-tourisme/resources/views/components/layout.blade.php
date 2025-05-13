@@ -21,51 +21,58 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="{{ route('accueil') }}">
-                    <i class="bi bi-globe"></i> Tourisme Maroc
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('accueil') ? 'active' : '' }}" href="{{ route('accueil') }}">Accueil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('services.index') ? 'active' : '' }}" href="{{ route('services.index') }}">Services</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        @auth
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{ Auth::user()->name }}
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{{ route('prestataire.tableau') }}">Tableau de bord</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form action="{{ route('prestataire.deconnexion') }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item">Déconnexion</button>
-                                        </form>
-                                    </li>
-                                </ul>
+    <div class="container">
+        <a class="navbar-brand" href="{{ route('accueil') }}">
+            <i class="bi bi-globe me-2"></i> Tourisme Maroc
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('accueil') ? 'active' : '' }}" href="{{ route('accueil') }}">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}" href="{{ route('services.index') }}">Services</a>
+                </li>
+            </ul>
+            
+            <ul class="navbar-nav">
+                @if(Session::has('prestataire_id'))
+                    <!-- Utilisateur connecté -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            {{ Session::get('prestataire_nom') }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ route('prestataire.tableau') }}"><i class="bi bi-speedometer2 me-2"></i> Tableau de bord</a></li>
+                            <li><a class="dropdown-item" href="{{ route('prestataire.service.edit') }}"><i class="bi bi-shop me-2"></i> Mon service</a></li>
+                            <li><a class="dropdown-item" href="{{ route('prestataire.statistiques') }}"><i class="bi bi-graph-up me-2"></i> Statistiques</a></li>
+                            <li><a class="dropdown-item" href="{{ route('prestataire.rapports.index') }}"><i class="bi bi-file-text me-2"></i> Rapports</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('prestataire.deconnexion') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</button>
+                                </form>
                             </li>
-                        @else
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('prestataire.connexion') ? 'active' : '' }}" href="{{ route('prestataire.connexion') }}">Connexion</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('prestataire.inscription') ? 'active' : '' }}" href="{{ route('prestataire.inscription') }}">Inscription</a>
-                            </li>
-                        @endauth
-                    </ul>
-                </div>
-            </div>
-        </nav>
+                        </ul>
+                    </li>
+                @else
+                    <!-- Utilisateur non connecté -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('prestataire.connexion') ? 'active' : '' }}" href="{{ route('prestataire.connexion') }}">Connexion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('prestataire.inscription') ? 'active' : '' }}" href="{{ route('prestataire.inscription') }}">Inscription</a>
+                    </li>
+                @endif
+            </ul>
+        </div>
+    </div>
+</nav>
     </header>
 
     <main>
