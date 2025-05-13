@@ -135,40 +135,29 @@ class PrestataireServiceController extends Controller
     }
     
     public function storeImage(Request $request)
-    {
-        // Récupérer le prestataire depuis la session au lieu de Auth::user()
-        $prestataire = Prestataire::find(Session::get('prestataire_id'));
-        
-        if (!$prestataire) {
-            return redirect()->route('prestataire.connexion')
-                ->with('error', 'Vous devez être connecté pour ajouter une image.');
-        }
-        
-        $service = $prestataire->service;
-        
-        if (!$service) {
-            return redirect()->route('prestataire.service.create')
-                ->with('error', 'Vous devez d\'abord créer un service avant d\'ajouter des images.');
-        }
-        
-        $request->validate([
-            'image' => 'required|image|max:2048', // 2MB max
-        ]);
-        
-        $path = $request->file('image')->store('services', 'public');
-        
-        // Vérifier si c'est la première image pour définir comme principale
-        $isPrincipale = $service->images()->count() === 0;
-        
-        $image = $service->images()->create([
-            'chemin' => $path,
-            'principale' => $isPrincipale,
-            'ordre' => $service->images()->max('ordre') + 1,
-        ]);
-        
-        return redirect()->route('prestataire.service.edit')
-            ->with('success', 'Image ajoutée avec succès.');
-    }
+{
+    $prestataire = Prestataire::find(Session::get('prestataire_id'));
+    $service = $prestataire->service;
+    
+    $request->validate([
+        'image' => 'required|image|max:2048', // 2MB max
+    ]);
+    
+    // Utiliser la méthode store pour sauvegarder l'image dans le dossier public/storage/services
+    $path = $request->file('image')->store('services', 'public');
+    
+    // Vérifier si c'est la première image pour définir comme principale
+    $isPrincipale = $service->images()->count() === 0;
+    
+    $image = $service->images()->create([
+        'chemin' => $path,
+        'principale' => $isPrincipale,
+        'ordre' => $service->images()->max('ordre') + 1,
+    ]);
+    
+    return redirect()->route('prestataire.service.edit')
+        ->with('success', 'Image ajoutée avec succès.');
+}
     
     public function destroyImage(Request $request, Image $image)
     {
