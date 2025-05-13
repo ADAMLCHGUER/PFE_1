@@ -5,18 +5,25 @@ namespace App\Http\Controllers;
 use App\Actions\Service\MettreAJourService;
 use App\Models\Categorie;
 use App\Models\Image;
+use App\Models\Prestataire;
 use App\Models\Service;
 use App\Models\Ville;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class PrestataireServiceController extends Controller
 {
-    public function create()
+    public function create(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour créer un service.');
+        }
         
         // Vérifier si le prestataire a déjà un service
         if ($prestataire->service) {
@@ -26,12 +33,18 @@ class PrestataireServiceController extends Controller
         $categories = Categorie::all();
         $villes = Ville::all();
         
-        return view('prestataire.formulaire_service', compact('categories', 'villes'));
+        return view('prestataire.formulaire_service', compact('prestataire', 'categories', 'villes'));
     }
     
     public function store(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour créer un service.');
+        }
         
         // Vérifier si le prestataire a déjà un service
         if ($prestataire->service) {
@@ -61,9 +74,16 @@ class PrestataireServiceController extends Controller
             ->with('success', 'Service créé avec succès. Vous pouvez maintenant ajouter des images.');
     }
     
-    public function edit()
+    public function edit(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour modifier un service.');
+        }
+        
         $service = $prestataire->service;
         
         // Si le prestataire n'a pas encore de service, rediriger vers la création
@@ -74,12 +94,19 @@ class PrestataireServiceController extends Controller
         $categories = Categorie::all();
         $villes = Ville::all();
         
-        return view('prestataire.formulaire_service', compact('service', 'categories', 'villes'));
+        return view('prestataire.formulaire_service', compact('prestataire', 'service', 'categories', 'villes'));
     }
     
     public function update(Request $request, MettreAJourService $mettreAJourService)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour modifier un service.');
+        }
+        
         $service = $prestataire->service;
         
         // Si le prestataire n'a pas encore de service, rediriger vers la création
@@ -109,8 +136,20 @@ class PrestataireServiceController extends Controller
     
     public function storeImage(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour ajouter une image.');
+        }
+        
         $service = $prestataire->service;
+        
+        if (!$service) {
+            return redirect()->route('prestataire.service.create')
+                ->with('error', 'Vous devez d\'abord créer un service avant d\'ajouter des images.');
+        }
         
         $request->validate([
             'image' => 'required|image|max:2048', // 2MB max
@@ -131,13 +170,20 @@ class PrestataireServiceController extends Controller
             ->with('success', 'Image ajoutée avec succès.');
     }
     
-    public function destroyImage(Image $image)
+    public function destroyImage(Request $request, Image $image)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour supprimer une image.');
+        }
+        
         $service = $prestataire->service;
         
         // Vérifier que l'image appartient bien au service du prestataire
-        if ($image->service_id !== $service->id) {
+        if (!$service || $image->service_id !== $service->id) {
             abort(403);
         }
         
@@ -157,13 +203,20 @@ class PrestataireServiceController extends Controller
             ->with('success', 'Image supprimée avec succès.');
     }
     
-    public function setImagePrincipale(Image $image)
+    public function setImagePrincipale(Request $request, Image $image)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session au lieu de Auth::user()
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour modifier une image.');
+        }
+        
         $service = $prestataire->service;
         
         // Vérifier que l'image appartient bien au service du prestataire
-        if ($image->service_id !== $service->id) {
+        if (!$service || $image->service_id !== $service->id) {
             abort(403);
         }
         

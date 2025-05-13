@@ -2,66 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Prestataire;
+use App\Models\Service;
 use App\Models\Visite;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class StatistiquesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $prestataire = Auth::user()->prestataire;
+        // Récupérer le prestataire depuis la session
+        $prestataire = Prestataire::find(Session::get('prestataire_id'));
+        
+        if (!$prestataire) {
+            return redirect()->route('prestataire.connexion')
+                ->with('error', 'Vous devez être connecté pour accéder aux statistiques.');
+        }
+        
         $service = $prestataire->service;
         
         if (!$service) {
             return redirect()->route('prestataire.service.create')
-                ->with('info', 'Vous devez d\'abord créer votre service.');
+                ->with('error', 'Vous devez d\'abord créer un service pour voir les statistiques.');
         }
         
         // Statistiques générales
         $totalVisites = $service->visites()->count();
+        $visitesUniques = $service->visites()->distinct('ip')->count('ip');
         
-        // Visites par jour (30 derniers jours)
-        $visitesParJour = Visite::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        // Visites par mois (12 derniers mois)
+        $visitesParMois = Visite::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
             ->where('service_id', $service->id)
-            ->whereBetween('created_at', [now()->subDays(30), now()])
-            ->groupBy('date')
-            ->orderBy('date')
+            ->whereBetween('created_at', [now()->subMonths(11), now()])
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
             ->get();
         
-        // Visites par référent
-        $visitesParReferent = Visite::select('referrer', DB::raw('COUNT(*) as count'))
-            ->where('service_id', $service->id)
-            ->whereNotNull('referrer')
-            ->groupBy('referrer')
-            ->orderBy('count', 'desc')
-            ->take(10)
-            ->get();
+        // Formater les données pour le graphique
+        $mois = [];
+        $compteurs = [];
         
-        // Visites par navigateur
-        $visitesParNavigateur = Visite::select(
-                DB::raw('CASE 
-                    WHEN user_agent LIKE "%Chrome%" THEN "Chrome"
-                    WHEN user_agent LIKE "%Firefox%" THEN "Firefox"
-                    WHEN user_agent LIKE "%Safari%" THEN "Safari"
-                    WHEN user_agent LIKE "%Edge%" THEN "Edge"
-                    WHEN user_agent LIKE "%MSIE%" OR user_agent LIKE "%Trident%" THEN "Internet Explorer"
-                    ELSE "Autre"
-                END as navigateur'),
-                DB::raw('COUNT(*) as count')
-            )
+        foreach ($visitesParMois as $visite) {
+            $date = \Carbon\Carbon::createFromDate($visite->year, $visite->month, 1);
+            $mois[] = $date->format('M Y');
+            $compteurs[] = $visite->count;
+        }
+        
+        // Sources de trafic
+        $sources = Visite::selectRaw('source, COUNT(*) as count')
             ->where('service_id', $service->id)
-            ->groupBy('navigateur')
+            ->groupBy('source')
             ->orderBy('count', 'desc')
             ->get();
         
         return view('prestataire.statistiques', compact(
+            'prestataire',
             'service',
             'totalVisites',
-            'visitesParJour',
-            'visitesParReferent',
-            'visitesParNavigateur'
+            'visitesUniques',
+            'mois',
+            'compteurs',
+            'sources'
         ));
     }
 }

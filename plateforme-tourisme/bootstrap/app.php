@@ -14,10 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'prestataire.valide' => VerifierPrestataireValide::class,
-            'auth.prestataire' => AuthenticatePrestataire::class,
-        ]);
+       $middleware->alias([
+        'auth.prestataire' => \App\Http\Middleware\AuthenticatePrestataire::class,
+        'prestataire.valide' => \App\Http\Middleware\VerifierPrestataireValide::class,
+    ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

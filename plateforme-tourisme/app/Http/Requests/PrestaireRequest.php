@@ -3,6 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Prestataire;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;    
 
 class PrestaireRequest extends FormRequest
 {

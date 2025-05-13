@@ -63,20 +63,20 @@ class PrestataireAuthController extends Controller
         
         // Vérifier le mot de passe
         if ($prestataire && Hash::check($credentials['password'], $prestataire->password)) {
-            // Stocker l'ID du prestataire en session
-            Session::put('prestataire_id', $prestataire->id);
-            Session::put('prestataire_email', $prestataire->email);
-            Session::put('prestataire_nom', $prestataire->nom_entreprise);
-            
-            $request->session()->regenerate();
-            
-            // Rediriger en fonction du statut
-            if ($prestataire->estValide()) {
-                return redirect()->route('prestataire.tableau');
-            }
-            
-            return redirect()->route('prestataire.attente');
-        }
+    // Stockez l'ID du prestataire en session de manière uniforme
+    Session::put('prestataire_id', $prestataire->id);
+    Session::put('prestataire_email', $prestataire->email);
+    Session::put('prestataire_nom', $prestataire->nom_entreprise);
+    
+    $request->session()->regenerate();
+    
+    // Rediriger en fonction du statut
+    if ($prestataire->estValide()) {
+        return redirect()->route('prestataire.tableau');
+    } else {
+        return redirect()->route('prestataire.attente');
+    }
+}
         
         return back()->withErrors([
             'email' => 'Les informations d\'identification fournies ne correspondent pas à nos enregistrements.',

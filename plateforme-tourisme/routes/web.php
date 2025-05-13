@@ -9,6 +9,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StatistiquesController;
 use Illuminate\Support\Facades\Route;
 
+
 // Routes publiques
 Route::get('/', [AccueilController::class, 'index'])->name('accueil');
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');

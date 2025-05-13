@@ -38,19 +38,22 @@ class PrestatairePanneauController extends Controller
     }
     
     public function attente(Request $request)
-    {
-        // Si la session a un prestataire_id, on récupère le prestataire
-        if (Session::has('prestataire_id')) {
-            $prestataire = \App\Models\Prestataire::find(Session::get('prestataire_id'));
-            
-            if ($prestataire && $prestataire->estValide()) {
+{
+    if (Session::has('prestataire_id')) {
+        $prestataire = \App\Models\Prestataire::find(Session::get('prestataire_id'));
+        
+        if ($prestataire) {
+            // Si le prestataire est valide, le rediriger vers le tableau
+            if ($prestataire->estValide()) {
                 return redirect()->route('prestataire.tableau');
             }
             
+            // Sinon, afficher la page d'attente
             return view('prestataire.attente', compact('prestataire'));
         }
-        
-        // Si pas de prestataire en session, rediriger vers la connexion
-        return redirect()->route('prestataire.connexion');
     }
+    
+    // Si pas de prestataire en session, rediriger vers la connexion
+    return redirect()->route('prestataire.connexion');
+}
 }
