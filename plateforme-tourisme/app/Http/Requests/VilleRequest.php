@@ -16,7 +16,8 @@ class VilleRequest extends FormRequest
         return [
             'nom' => 'required|min:2|max:255',
             'slug' => 'nullable|unique:villes,slug,' . $this->id,
-            'image' => 'nullable|image',
+            // Change the validation for image field
+            'image' => 'nullable|sometimes|image|max:5000',
             'description' => 'nullable|string',
             'populaire' => 'boolean',
         ];

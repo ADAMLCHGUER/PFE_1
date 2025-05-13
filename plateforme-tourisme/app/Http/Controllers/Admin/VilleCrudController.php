@@ -11,8 +11,12 @@ use Illuminate\Support\Str;
 class VilleCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation {
+        store as traitStore;
+    }
+    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation {
+        update as traitUpdate;
+    }
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
@@ -28,6 +32,8 @@ class VilleCrudController extends CrudController
         CRUD::column('id');
         CRUD::column('nom');
         CRUD::column('slug');
+        // Add image column
+        CRUD::column('image')->type('image')->prefix('storage/');
         CRUD::column('populaire')->type('boolean');
         CRUD::column('created_at');
         CRUD::column('updated_at');
@@ -40,14 +46,25 @@ class VilleCrudController extends CrudController
         CRUD::field('nom');
         CRUD::field('slug')->hint('Laissez vide pour générer automatiquement à partir du nom.');
         CRUD::field('description')->type('textarea');
-// Dans VilleCrudController.php
-CRUD::field('image')->type('upload')->upload(true)->disk('public')->prefix('villes/');
+        
+        // Update upload field to use simply 'upload' instead of detailed configuration
+        CRUD::field('image')
+            ->type('upload')
+            ->label('Image')
+            ->hint('Sélectionnez une image pour cette ville')
+            ->upload(true);
+            
         CRUD::field('populaire')->type('checkbox')->label('Ville populaire');
     }
 
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+    }
+
+    protected function setupShowOperation()
+    {
+        $this->setupListOperation();
     }
 
     // Méthode pour générer automatiquement le slug
